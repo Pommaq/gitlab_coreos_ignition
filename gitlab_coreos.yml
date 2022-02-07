@@ -65,8 +65,8 @@ systemd:
                     Wants=network-online.target
                     [Service]
                     User=gitlab
-                    ExecStop=/bin/podman stop gitlab && /bin/podman rm gitlab
-                    ExecStart=/bin/podman run --pull=always --hostname=gitlab.example.com --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /var/gitlab/config:/etc/gitlab:Z --volume /var/gitlab/logs:/var/log/gitlab:Z --volume /var/gitlab/data:/var/opt/gitlab:Z docker.io/gitlab/gitlab-ee:latest
+                    ExecStop=/bin/podman stop gitlab
+                    ExecStart=/bin/podman run --rm --pull=always --hostname=gitlab.example.com --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /var/gitlab/config:/etc/gitlab:Z --volume /var/gitlab/logs:/var/log/gitlab:Z --volume /var/gitlab/data:/var/opt/gitlab:Z docker.io/gitlab/gitlab-ee:latest
                     [Install]
                     WantedBy=multi-user.target
 
