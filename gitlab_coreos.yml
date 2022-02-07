@@ -1,0 +1,72 @@
+version: 1.4.0
+variant: fcos
+passwd:
+    users:
+        - name: timmy
+          password_hash: "$y$j9T$kxrdl/lhLy6yDOPYMhvpa0$LU5HuhOgoEqIuepFmjHKglw9KJpIEktu8Qu9bGhsyW2" # penis12345
+          ssh_authorized_keys:
+            - ssh-rsa ...= timmy@fedora
+          groups: [ sudo, docker ]
+
+        - name: gitlab
+          groups: [ docker ]
+
+storage:
+    files:
+    # Enables lingering on gitlab user so it can run podman
+    - path: /var/lib/systemd/linger/gitlab
+      mode: 0644
+    # Set permissions for gitlab files
+    - path: /etc/hostname
+      overwrite: true
+      contents:
+        inline: bthgitlab
+    - path: /etc/sysctl.conf
+      overwrite: true
+      mode: 0644
+      contents:
+        inline: "net.ipv4.ip_unprivileged_port_start=443\nnet.ipv4.ip_unprivileged_port_start=80\n"
+
+    directories:
+        - path: /var/gitlab
+          overwrite: true
+          mode: 0744
+          user:
+            name: gitlab
+
+        - path: /var/gitlab/config
+          overwrite: true
+          mode: 0744
+          user:
+            name: gitlab
+
+        - path: /var/gitlab/logs
+          overwrite: true
+          mode: 0744
+          user:
+            name: gitlab
+
+        - path: /var/gitlab/data
+          overwrite: true
+          mode: 0744
+          user:
+            name: gitlab
+
+
+
+systemd:
+    units:
+        - name: gitlab.service
+          enabled: true
+          contents: |
+                    [Unit]
+                    Description=Host gitlab
+                    After=network-online.target
+                    Wants=network-online.target
+                    [Service]
+                    User=gitlab
+                    ExecStop=/bin/podman stop gitlab && /bin/podman rm gitlab
+                    ExecStart=/bin/podman run --pull=always --hostname=gitlab.example.com --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /var/gitlab/config:/etc/gitlab:Z --volume /var/gitlab/logs:/var/log/gitlab:Z --volume /var/gitlab/data:/var/opt/gitlab:Z docker.io/gitlab/gitlab-ee:latest
+                    [Install]
+                    WantedBy=multi-user.target
+
