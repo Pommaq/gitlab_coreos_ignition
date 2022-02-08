@@ -5,8 +5,7 @@ passwd:
         - name: timmy
           password_hash: "$y$j9T$kxrdl/lhLy6yDOPYMhvpa0$LU5HuhOgoEqIuepFmjHKglw9KJpIEktu8Qu9bGhsyW2" # penis12345
           ssh_authorized_keys:
-            - ssh-rsa ...= timmy@fedora
-          groups: [ sudo, docker ]
+            - ssh-rsa AA...BC= timmy@fedora
 
         - name: gitlab
           groups: [ docker ]
@@ -65,8 +64,9 @@ systemd:
                     Wants=network-online.target
                     [Service]
                     User=gitlab
-                    ExecStop=/bin/podman stop gitlab
-                    ExecStart=/bin/podman run --rm --pull=always --hostname=gitlab.example.com --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /var/gitlab/config:/etc/gitlab:Z --volume /var/gitlab/logs:/var/log/gitlab:Z --volume /var/gitlab/data:/var/opt/gitlab:Z docker.io/gitlab/gitlab-ee:latest
+                    TimeoutSec=900
+                    ExecStop=/bin/podman stop --ignore gitlab
+                    ExecStart=/bin/podman run --rm --pull=always --hostname=gitlab.bthstudent.se --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --volume /var/gitlab/config:/etc/gitlab:Z --volume /var/gitlab/logs:/var/log/gitlab:Z --volume /var/gitlab/data:/var/opt/gitlab:Z docker.io/gitlab/gitlab-ee:latest
                     [Install]
                     WantedBy=multi-user.target
 
